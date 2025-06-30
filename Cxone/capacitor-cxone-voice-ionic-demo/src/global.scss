@@ -1,0 +1,106 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/* Custom styles */
+.call-button {
+  width: 60px;
+  height: 60px;
+  font-size: 24px;
+}
+
+.dialer-display {
+  font-size: 24px;
+  font-weight: 300;
+  text-align: center;
+  padding: 20px;
+  background: var(--ion-color-light);
+  border-radius: 10px;
+  margin: 10px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialer-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+.dialer-button {
+  aspect-ratio: 1;
+  font-size: 24px;
+  font-weight: 300;
+}
+
+.active-call-timer {
+  font-size: 48px;
+  font-weight: 200;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.audio-level-container {
+  padding: 20px;
+}
+
+.audio-level-bar {
+  height: 8px;
+  background: var(--ion-color-light);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.audio-level-fill {
+  height: 100%;
+  background: var(--ion-color-success);
+  transition: width 0.1s ease;
+}
+
+.call-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  padding: 20px;
+}
+
+.call-action-button {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  
+  ion-icon {
+    font-size: 24px;
+    margin-bottom: 5px;
+  }
+}

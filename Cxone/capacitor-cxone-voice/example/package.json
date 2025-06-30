@@ -1,0 +1,9 @@
+{
+  "name": "cxone-voice-example",
+  "version": "1.0.0",
+  "description": "Example app for CXONE Voice Capacitor plugin",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -c-1",
+    "serve": "python3 -m http.server 8080"
+  }
+}

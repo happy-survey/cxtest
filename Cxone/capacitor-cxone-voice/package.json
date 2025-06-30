@@ -1,0 +1,97 @@
+{
+  "name": "capacitor-cxone-voice",
+  "version": "0.0.1",
+  "description": "Capacitor plugin for CXONE voice capabilities with support for iOS, Android, and PWA",
+  "main": "dist/plugin.cjs.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "unpkg": "dist/plugin.js",
+  "files": [
+    "android/src/main/",
+    "android/build.gradle",
+    "android/gradle.properties",
+    "android/proguard-rules.pro",
+    "dist/",
+    "ios/Plugin/",
+    "CapacitorCxoneVoice.podspec"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/capacitor-cxone-voice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/capacitor-cxone-voice/issues"
+  },
+  "keywords": [
+    "capacitor",
+    "plugin",
+    "native",
+    "cxone",
+    "voice",
+    "webrtc",
+    "callkit",
+    "telecom"
+  ],
+  "scripts": {
+    "verify": "npm run verify:ios && npm run verify:android && npm run verify:web",
+    "verify:ios": "cd ios && pod install && xcodebuild -workspace Plugin.xcworkspace -scheme Plugin -configuration Debug CODE_SIGN_IDENTITY=\"\" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO",
+    "verify:android": "cd android && ./gradlew clean build test",
+    "verify:web": "npm run build",
+    "lint": "npm run eslint && npm run prettier -- --check && npm run swiftlint -- lint",
+    "fmt": "npm run eslint -- --fix && npm run prettier -- --write && npm run swiftlint -- --fix --format",
+    "eslint": "eslint . --ext ts",
+    "prettier": "prettier \"**/*.{css,html,ts,js,java}\"",
+    "swiftlint": "node-swiftlint",
+    "build": "npm run clean && npm run docgen && tsc && rollup -c rollup.config.js",
+    "clean": "rimraf ./dist",
+    "watch": "tsc --watch",
+    "docgen": "docgen --api CXONEVoicePlugin --output-readme README.md --output-json dist/docs.json",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^5.0.0",
+    "@capacitor/core": "^5.0.0",
+    "@capacitor/docgen": "^0.2.0",
+    "@capacitor/ios": "^5.0.0",
+    "@ionic/eslint-config": "^0.3.0",
+    "@ionic/prettier-config": "^4.0.0",
+    "@ionic/swiftlint-config": "^1.1.2",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@types/node": "^18.11.9",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
+    "eslint": "^8.27.0",
+    "prettier": "^2.7.1",
+    "prettier-plugin-java": "^2.0.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^3.2.5",
+    "swiftlint": "^1.0.1",
+    "typescript": "^4.8.4"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^5.0.0",
+    "@nice-devone/common-sdk": "^25.2.0",
+    "@nice-devone/core-sdk": "^25.2.0",
+    "@nice-devone/i18n": "^25.2.0",
+    "@nice-devone/shared-apps-lib": "^25.2.0",
+    "@nice-devone/voice-sdk": "^25.2.0"
+  },
+  "prettier": "@ionic/prettier-config",
+  "swiftlint": "@ionic/swiftlint-config",
+  "eslintConfig": {
+    "extends": "@ionic/eslint-config/recommended"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  },
+  "dependencies": {
+    "yup": "^1.6.1"
+  }
+}

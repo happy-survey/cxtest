@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(chmod:*)",
+      "Bash(npx ionic serve:*)",
+      "Bash(npx ng serve:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(node_modules/.bin/ng serve:*)",
+      "Bash(npx:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run start:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm start)",
+      "Bash(./node_modules/@angular/cli/bin/ng.js serve --port 8100)",
+      "Bash(curl:*)",
+      "Bash(rm:*)",
+      "Bash(./start-demo-background.sh:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(grep:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "Bash(npm run lint)",
+      "Bash(npm run eslint -- --fix)",
+      "Bash(npm run eslint:*)",
+      "Bash(npm run ionic:serve:*)",
+      "Bash(node:*)",
+      "Bash(ng build:*)"
+    ],
+    "deny": []
+  }
+}

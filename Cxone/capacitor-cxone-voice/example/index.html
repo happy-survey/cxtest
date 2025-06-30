@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CXONE Voice Plugin Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #666;
+            font-size: 18px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .danger {
+            background-color: #f44336;
+        }
+        .danger:hover {
+            background-color: #da190b;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+        .error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .call-info {
+            background-color: #fff3e0;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .audio-levels {
+            display: flex;
+            gap: 20px;
+            margin: 10px 0;
+        }
+        .level-bar {
+            flex: 1;
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .level-fill {
+            height: 100%;
+            background-color: #4CAF50;
+            transition: width 0.1s ease;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CXONE Voice Plugin Example</h1>
+        
+        <div class="section">
+            <h2>Initialize</h2>
+            <input type="text" id="agentId" placeholder="Agent ID" value="test-agent">
+            <input type="text" id="apiKey" placeholder="API Key" value="test-api-key">
+            <select id="environment" style="width: 100%; padding: 10px; margin: 5px 0;">
+                <option value="development">Development</option>
+                <option value="staging">Staging</option>
+                <option value="production">Production</option>
+            </select>
+            <button onclick="initializePlugin()">Initialize Plugin</button>
+            <div id="initStatus" class="status" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Make Call</h2>
+            <input type="tel" id="phoneNumber" placeholder="Phone Number (e.g., +1234567890)">
+            <input type="text" id="displayName" placeholder="Display Name (optional)">
+            <button onclick="makeCall()" id="makeCallBtn" disabled>Make Call</button>
+        </div>
+
+        <div id="activeCallSection" class="section" style="display: none;">
+            <h2>Active Call</h2>
+            <div class="call-info">
+                <p><strong>Call ID:</strong> <span id="activeCallId"></span></p>
+                <p><strong>Phone Number:</strong> <span id="activePhoneNumber"></span></p>
+                <p><strong>State:</strong> <span id="callState"></span></p>
+                <p><strong>Duration:</strong> <span id="callDuration">00:00</span></p>
+            </div>
+            
+            <div class="audio-levels">
+                <div style="flex: 1;">
+                    <label>Local Audio:</label>
+                    <div class="level-bar">
+                        <div class="level-fill" id="localLevel"></div>
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <label>Remote Audio:</label>
+                    <div class="level-bar">
+                        <div class="level-fill" id="remoteLevel"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button onclick="toggleMute()" id="muteBtn">Mute</button>
+                <button onclick="toggleHold()" id="holdBtn">Hold</button>
+                <button onclick="endCall()" class="danger">End Call</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Play Recording</h2>
+            <input type="url" id="recordingUrl" placeholder="Recording URL" value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">
+            <input type="range" id="volume" min="0" max="100" value="50" style="width: 100%;">
+            <label>Volume: <span id="volumeLabel">50</span>%</label>
+            <div class="controls">
+                <button onclick="playRecording()" id="playBtn" disabled>Play Recording</button>
+                <button onclick="stopRecording()" id="stopBtn" disabled>Stop Recording</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Permissions</h2>
+            <button onclick="checkPermissions()">Check Permissions</button>
+            <button onclick="requestPermissions()">Request Permissions</button>
+            <div id="permissionStatus" class="status" style="display: none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>Event Log</h2>
+            <div id="eventLog" style="height: 200px; overflow-y: scroll; background: #f5f5f5; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                <p>Events will appear here...</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { CXONEVoice } from './capacitor-cxone-voice.js';
+        
+        let activeCall = null;
+        let isMuted = false;
+        let isOnHold = false;
+        let callTimer = null;
+        let callStartTime = null;
+
+        // Make functions globally available
+        window.CXONEVoice = CXONEVoice;
+        window.initializePlugin = initializePlugin;
+        window.makeCall = makeCall;
+        window.endCall = endCall;
+        window.toggleMute = toggleMute;
+        window.toggleHold = toggleHold;
+        window.playRecording = playRecording;
+        window.stopRecording = stopRecording;
+        window.checkPermissions = checkPermissions;
+        window.requestPermissions = requestPermissions;
+
+        // Volume slider
+        document.getElementById('volume').addEventListener('input', (e) => {
+            document.getElementById('volumeLabel').textContent = e.target.value;
+        });
+
+        function logEvent(message, type = 'info') {
+            const log = document.getElementById('eventLog');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('p');
+            entry.style.margin = '5px 0';
+            entry.style.color = type === 'error' ? '#c62828' : '#333';
+            entry.innerHTML = `<strong>[${time}]</strong> ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function initializePlugin() {
+            const status = document.getElementById('initStatus');
+            status.style.display = 'block';
+            status.className = 'status';
+            status.textContent = 'Initializing...';
+
+            try {
+                await CXONEVoice.initialize({
+                    agentId: document.getElementById('agentId').value,
+                    apiKey: document.getElementById('apiKey').value,
+                    environment: document.getElementById('environment').value,
+                    enableCallKit: true,
+                    enableConnectionService: true,
+                    enablePushNotifications: true
+                });
+
+                status.className = 'status success';
+                status.textContent = 'Plugin initialized successfully!';
+                
+                // Enable buttons
+                document.getElementById('makeCallBtn').disabled = false;
+                document.getElementById('playBtn').disabled = false;
+                
+                // Setup event listeners
+                setupEventListeners();
+                
+                logEvent('Plugin initialized successfully');
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `Initialization failed: ${error.message}`;
+                logEvent(`Initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        function setupEventListeners() {
+            CXONEVoice.addListener('incomingCall', (event) => {
+                logEvent(`Incoming call from ${event.phoneNumber}`);
+                if (confirm(`Incoming call from ${event.phoneNumber}. Answer?`)) {
+                    answerCall(event.callId);
+                }
+            });
+
+            CXONEVoice.addListener('callStateChanged', (event) => {
+                logEvent(`Call state changed: ${event.previousState} → ${event.currentState}`);
+                updateCallState(event.currentState);
+            });
+
+            CXONEVoice.addListener('audioLevelChanged', (event) => {
+                updateAudioLevels(event.localLevel, event.remoteLevel);
+            });
+
+            CXONEVoice.addListener('recordingPlaybackStateChanged', (event) => {
+                logEvent(`Recording ${event.state}: ${event.recordingUrl}`);
+                if (event.state === 'completed' || event.state === 'stopped') {
+                    document.getElementById('playBtn').disabled = false;
+                    document.getElementById('stopBtn').disabled = true;
+                }
+            });
+
+            CXONEVoice.addListener('error', (event) => {
+                logEvent(`Error: ${event.code} - ${event.message}`, 'error');
+            });
+        }
+
+        async function makeCall() {
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const displayName = document.getElementById('displayName').value;
+
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+
+            try {
+                const result = await CXONEVoice.makeCall({
+                    phoneNumber,
+                    displayName: displayName || undefined
+                });
+
+                activeCall = result;
+                showActiveCall(result.callId, phoneNumber);
+                logEvent(`Outbound call initiated: ${result.callId}`);
+            } catch (error) {
+                logEvent(`Failed to make call: ${error.message}`, 'error');
+            }
+        }
+
+        async function answerCall(callId) {
+            try {
+                await CXONEVoice.answerCall({ callId });
+                activeCall = { callId };
+                const callInfo = await CXONEVoice.getActiveCall();
+                if (callInfo) {
+                    showActiveCall(callInfo.callId, callInfo.phoneNumber);
+                }
+                logEvent(`Call answered: ${callId}`);
+            } catch (error) {
+                logEvent(`Failed to answer call: ${error.message}`, 'error');
+            }
+        }
+
+        async function endCall() {
+            if (!activeCall) return;
+
+            try {
+                await CXONEVoice.endCall({
+                    callId: activeCall.callId,
+                    reason: 'user_initiated'
+                });
+                hideActiveCall();
+                logEvent('Call ended');
+            } catch (error) {
+                logEvent(`Failed to end call: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleMute() {
+            if (!activeCall) return;
+
+            try {
+                isMuted = !isMuted;
+                await CXONEVoice.muteCall({
+                    callId: activeCall.callId,
+                    muted: isMuted
+                });
+                document.getElementById('muteBtn').textContent = isMuted ? 'Unmute' : 'Mute';
+                logEvent(`Call ${isMuted ? 'muted' : 'unmuted'}`);
+            } catch (error) {
+                logEvent(`Failed to toggle mute: ${error.message}`, 'error');
+            }
+        }
+
+        async function toggleHold() {
+            if (!activeCall) return;
+
+            try {
+                if (isOnHold) {
+                    await CXONEVoice.resumeCall({ callId: activeCall.callId });
+                    isOnHold = false;
+                    document.getElementById('holdBtn').textContent = 'Hold';
+                    logEvent('Call resumed');
+                } else {
+                    await CXONEVoice.holdCall({ callId: activeCall.callId });
+                    isOnHold = true;
+                    document.getElementById('holdBtn').textContent = 'Resume';
+                    logEvent('Call on hold');
+                }
+            } catch (error) {
+                logEvent(`Failed to toggle hold: ${error.message}`, 'error');
+            }
+        }
+
+        async function playRecording() {
+            if (!activeCall) {
+                alert('No active call. Please make a call first.');
+                return;
+            }
+
+            const recordingUrl = document.getElementById('recordingUrl').value;
+            const volume = document.getElementById('volume').value / 100;
+
+            if (!recordingUrl) {
+                alert('Please enter a recording URL');
+                return;
+            }
+
+            try {
+                await CXONEVoice.playRecording({
+                    callId: activeCall.callId,
+                    recordingUrl,
+                    volume,
+                    loop: false
+                });
+                document.getElementById('playBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                logEvent(`Playing recording: ${recordingUrl}`);
+            } catch (error) {
+                logEvent(`Failed to play recording: ${error.message}`, 'error');
+            }
+        }
+
+        async function stopRecording() {
+            if (!activeCall) return;
+
+            try {
+                await CXONEVoice.stopRecording({
+                    callId: activeCall.callId
+                });
+                document.getElementById('playBtn').disabled = false;
+                document.getElementById('stopBtn').disabled = true;
+                logEvent('Recording stopped');
+            } catch (error) {
+                logEvent(`Failed to stop recording: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkPermissions() {
+            try {
+                const permissions = await CXONEVoice.checkPermissions();
+                const status = document.getElementById('permissionStatus');
+                status.style.display = 'block';
+                status.className = 'status';
+                status.innerHTML = `
+                    <strong>Permissions:</strong><br>
+                    Microphone: ${permissions.microphone}<br>
+                    ${permissions.notifications ? `Notifications: ${permissions.notifications}<br>` : ''}
+                    ${permissions.phone ? `Phone: ${permissions.phone}` : ''}
+                `;
+                logEvent('Permissions checked');
+            } catch (error) {
+                logEvent(`Failed to check permissions: ${error.message}`, 'error');
+            }
+        }
+
+        async function requestPermissions() {
+            try {
+                const permissions = await CXONEVoice.requestPermissions();
+                const status = document.getElementById('permissionStatus');
+                status.style.display = 'block';
+                status.className = 'status success';
+                status.textContent = 'Permissions requested successfully';
+                logEvent('Permissions requested');
+                
+                // Check permissions again to show updated status
+                setTimeout(checkPermissions, 500);
+            } catch (error) {
+                logEvent(`Failed to request permissions: ${error.message}`, 'error');
+            }
+        }
+
+        function showActiveCall(callId, phoneNumber) {
+            document.getElementById('activeCallSection').style.display = 'block';
+            document.getElementById('activeCallId').textContent = callId;
+            document.getElementById('activePhoneNumber').textContent = phoneNumber;
+            
+            // Start call timer
+            callStartTime = Date.now();
+            updateCallDuration();
+            callTimer = setInterval(updateCallDuration, 1000);
+        }
+
+        function hideActiveCall() {
+            document.getElementById('activeCallSection').style.display = 'none';
+            activeCall = null;
+            isMuted = false;
+            isOnHold = false;
+            
+            // Reset buttons
+            document.getElementById('muteBtn').textContent = 'Mute';
+            document.getElementById('holdBtn').textContent = 'Hold';
+            document.getElementById('playBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            
+            // Stop timer
+            if (callTimer) {
+                clearInterval(callTimer);
+                callTimer = null;
+            }
+        }
+
+        function updateCallState(state) {
+            const stateElement = document.getElementById('callState');
+            if (stateElement) {
+                stateElement.textContent = state;
+                
+                // Update UI based on state
+                if (state === 'disconnected' || state === 'failed') {
+                    hideActiveCall();
+                }
+            }
+        }
+
+        function updateCallDuration() {
+            if (!callStartTime) return;
+            
+            const duration = Math.floor((Date.now() - callStartTime) / 1000);
+            const minutes = Math.floor(duration / 60);
+            const seconds = duration % 60;
+            
+            document.getElementById('callDuration').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateAudioLevels(localLevel, remoteLevel) {
+            document.getElementById('localLevel').style.width = `${localLevel * 100}%`;
+            document.getElementById('remoteLevel').style.width = `${remoteLevel * 100}%`;
+        }
+
+        // Auto-initialize if running in development
+        if (window.location.hostname === 'localhost') {
+            setTimeout(() => {
+                logEvent('Auto-initializing in development mode...');
+                initializePlugin();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

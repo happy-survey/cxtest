@@ -1,0 +1,7 @@
+{
+  "name": "cxone-voice-ionic-demo",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

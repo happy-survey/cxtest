@@ -1,0 +1,118 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Active Call</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <div *ngIf="activeCall" class="call-container">
+    <!-- Contact Info -->
+    <div class="contact-info">
+      <ion-avatar>
+        <ion-icon name="person-circle-outline" style="font-size: 80px;"></ion-icon>
+      </ion-avatar>
+      <h1>{{ activeCall.displayName || activeCall.phoneNumber }}</h1>
+      <p *ngIf="activeCall.displayName">{{ activeCall.phoneNumber }}</p>
+    </div>
+
+    <!-- Call Status -->
+    <div class="call-status">
+      <ion-chip [color]="getStateColor(activeCall.state)">
+        <ion-label>{{ activeCall.state | uppercase }}</ion-label>
+      </ion-chip>
+    </div>
+
+    <!-- Call Timer -->
+    <div class="active-call-timer">
+      {{ formatDuration(activeCall.duration) }}
+    </div>
+
+    <!-- Audio Levels -->
+    <div class="audio-level-container">
+      <div>
+        <ion-label>Your Audio</ion-label>
+        <div class="audio-level-bar">
+          <div class="audio-level-fill" [style.width.%]="audioLevels.local * 100"></div>
+        </div>
+      </div>
+      <div>
+        <ion-label>Remote Audio</ion-label>
+        <div class="audio-level-bar">
+          <div class="audio-level-fill" [style.width.%]="audioLevels.remote * 100"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call Actions -->
+    <div class="call-actions">
+      <ion-button 
+        class="call-action-button" 
+        [fill]="activeCall.isMuted ? 'solid' : 'outline'"
+        (click)="toggleMute()">
+        <ion-icon [name]="activeCall.isMuted ? 'mic-off' : 'mic'"></ion-icon>
+        <span>{{ activeCall.isMuted ? 'Unmute' : 'Mute' }}</span>
+      </ion-button>
+
+      <ion-button 
+        class="call-action-button" 
+        [fill]="activeCall.isOnHold ? 'solid' : 'outline'"
+        (click)="toggleHold()">
+        <ion-icon name="pause"></ion-icon>
+        <span>{{ activeCall.isOnHold ? 'Resume' : 'Hold' }}</span>
+      </ion-button>
+
+      <ion-button 
+        class="call-action-button" 
+        fill="outline"
+        (click)="toggleSpeaker()">
+        <ion-icon name="volume-high"></ion-icon>
+        <span>Speaker</span>
+      </ion-button>
+
+      <ion-button 
+        class="call-action-button" 
+        fill="outline"
+        (click)="showRecordingDialog()"
+        *ngIf="recordingState === 'stopped'">
+        <ion-icon name="play-circle"></ion-icon>
+        <span>Play Audio</span>
+      </ion-button>
+
+      <ion-button 
+        class="call-action-button" 
+        fill="solid"
+        color="warning"
+        (click)="stopRecording()"
+        *ngIf="recordingState !== 'stopped'">
+        <ion-icon name="stop-circle"></ion-icon>
+        <span>Stop Audio</span>
+      </ion-button>
+
+      <ion-button 
+        class="call-action-button" 
+        fill="outline"
+        disabled>
+        <ion-icon name="swap-horizontal"></ion-icon>
+        <span>Transfer</span>
+      </ion-button>
+    </div>
+
+    <!-- End Call Button -->
+    <div class="end-call-container">
+      <ion-button 
+        class="end-call-button" 
+        color="danger" 
+        (click)="endCall()"
+        shape="round">
+        <ion-icon name="call" style="transform: rotate(135deg);"></ion-icon>
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- No Active Call -->
+  <div *ngIf="!activeCall" class="no-call">
+    <ion-icon name="call-outline" style="font-size: 64px; color: var(--ion-color-medium);"></ion-icon>
+    <p>No active call</p>
+    <ion-button routerLink="/tabs/dialer">Go to Dialer</ion-button>
+  </div>
+</ion-content>

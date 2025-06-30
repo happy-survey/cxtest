@@ -1,0 +1,27 @@
+<ion-content class="incoming-call-content">
+  <div class="incoming-call-container" *ngIf="incomingCall">
+    <div class="call-header">
+      <p>Incoming Call</p>
+    </div>
+
+    <div class="caller-info">
+      <ion-avatar>
+        <ion-icon name="person-circle-outline" style="font-size: 120px;"></ion-icon>
+      </ion-avatar>
+      <h1>{{ incomingCall.displayName || incomingCall.phoneNumber }}</h1>
+      <p *ngIf="incomingCall.displayName">{{ incomingCall.phoneNumber }}</p>
+    </div>
+
+    <div class="call-actions">
+      <div class="action-button decline" (click)="declineCall()">
+        <ion-icon name="close" style="font-size: 40px;"></ion-icon>
+        <p>Decline</p>
+      </div>
+
+      <div class="action-button answer" (click)="answerCall()">
+        <ion-icon name="call" style="font-size: 40px;"></ion-icon>
+        <p>Answer</p>
+      </div>
+    </div>
+  </div>
+</ion-content>

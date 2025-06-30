@@ -1,0 +1,192 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Dialer</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Dialer</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="dialer-container">
+    <!-- Display Name Input -->
+    <ion-item>
+      <ion-label position="floating">Display Name (Optional)</ion-label>
+      <ion-input 
+        [(ngModel)]="displayName" 
+        type="text"
+        placeholder="John Doe">
+      </ion-input>
+    </ion-item>
+
+    <!-- Phone Number Display -->
+    <div class="dialer-display">
+      {{ phoneNumber ? formatPhoneNumber(phoneNumber) : 'Enter phone number' }}
+    </div>
+
+    <!-- Number Pad -->
+    <div class="dialer-grid">
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('1')">
+        <div>
+          <div style="font-size: 24px;">1</div>
+          <div style="font-size: 10px;">&nbsp;</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('2')">
+        <div>
+          <div style="font-size: 24px;">2</div>
+          <div style="font-size: 10px;">ABC</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('3')">
+        <div>
+          <div style="font-size: 24px;">3</div>
+          <div style="font-size: 10px;">DEF</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('4')">
+        <div>
+          <div style="font-size: 24px;">4</div>
+          <div style="font-size: 10px;">GHI</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('5')">
+        <div>
+          <div style="font-size: 24px;">5</div>
+          <div style="font-size: 10px;">JKL</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('6')">
+        <div>
+          <div style="font-size: 24px;">6</div>
+          <div style="font-size: 10px;">MNO</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('7')">
+        <div>
+          <div style="font-size: 24px;">7</div>
+          <div style="font-size: 10px;">PQRS</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('8')">
+        <div>
+          <div style="font-size: 24px;">8</div>
+          <div style="font-size: 10px;">TUV</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('9')">
+        <div>
+          <div style="font-size: 24px;">9</div>
+          <div style="font-size: 10px;">WXYZ</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('*')">
+        <div style="font-size: 24px;">*</div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('0')">
+        <div>
+          <div style="font-size: 24px;">0</div>
+          <div style="font-size: 10px;">+</div>
+        </div>
+      </ion-button>
+      
+      <ion-button 
+        class="dialer-button" 
+        expand="block" 
+        fill="outline"
+        (click)="addDigit('#')">
+        <div style="font-size: 24px;">#</div>
+      </ion-button>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;">
+      <ion-button 
+        *ngIf="phoneNumber"
+        (click)="deleteDigit()" 
+        fill="clear"
+        color="medium">
+        <ion-icon name="backspace-outline" size="large"></ion-icon>
+      </ion-button>
+      
+      <ion-button 
+        (click)="makeCall()" 
+        class="call-button"
+        color="success"
+        [disabled]="!phoneNumber || !(voiceService.isInitialized$ | async)">
+        <ion-icon name="call" size="large"></ion-icon>
+      </ion-button>
+      
+      <ion-button 
+        *ngIf="phoneNumber"
+        (click)="clearNumber()" 
+        fill="clear"
+        color="medium">
+        <ion-icon name="close-circle-outline" size="large"></ion-icon>
+      </ion-button>
+    </div>
+
+    <!-- Status Message -->
+    <div *ngIf="!(voiceService.isInitialized$ | async)" style="text-align: center; margin-top: 20px; color: var(--ion-color-warning);">
+      <ion-icon name="warning-outline"></ion-icon>
+      Voice service is initializing...
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,240 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Settings</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <!-- CXONE Configuration -->
+  <ion-list-header>
+    <ion-label>CXONE Configuration</ion-label>
+  </ion-list-header>
+  
+  <ion-list>
+    <!-- Auth Mode Toggle -->
+    <ion-item>
+      <ion-label>Authentication Mode</ion-label>
+      <ion-segment [(ngModel)]="authMode" (ionChange)="toggleAuthMode()">
+        <ion-segment-button value="oauth">
+          <ion-label>OAuth</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="legacy">
+          <ion-label>Legacy</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+    </ion-item>
+
+    <!-- OAuth Configuration -->
+    <div *ngIf="authMode === 'oauth'">
+      <ion-item>
+        <ion-label position="stacked">Tenant ID</ion-label>
+        <ion-input 
+          [(ngModel)]="tenantId" 
+          type="text"
+          placeholder="e.g., your-tenant-id">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Client ID</ion-label>
+        <ion-input 
+          [(ngModel)]="clientId" 
+          type="text"
+          placeholder="e.g., your-client-id">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Client Secret (Optional)</ion-label>
+        <ion-input 
+          [(ngModel)]="clientSecret" 
+          type="password"
+          placeholder="For confidential clients only">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Default Skill ID</ion-label>
+        <ion-input 
+          [(ngModel)]="defaultSkillId" 
+          type="text"
+          placeholder="e.g., skill-id-for-outbound">
+        </ion-input>
+      </ion-item>
+
+      <ion-item *ngIf="!isAuthenticated">
+        <ion-button 
+          expand="block" 
+          (click)="loginToCxone()"
+          [disabled]="!tenantId || !clientId">
+          Login to CXONE
+        </ion-button>
+      </ion-item>
+      
+      <ion-item *ngIf="isAuthenticated">
+        <ion-label>
+          <h2>Authenticated</h2>
+          <p>Connected to CXONE</p>
+        </ion-label>
+        <ion-button 
+          slot="end"
+          fill="outline"
+          color="danger"
+          (click)="logoutFromCxone()">
+          Logout
+        </ion-button>
+      </ion-item>
+    </div>
+
+    <!-- Legacy Configuration -->
+    <div *ngIf="authMode === 'legacy'">
+      <ion-item>
+        <ion-label position="stacked">Agent ID</ion-label>
+        <ion-input 
+          [(ngModel)]="agentId" 
+          type="text"
+          placeholder="Enter your agent ID">
+        </ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">API Key</ion-label>
+        <ion-input 
+          [(ngModel)]="apiKey" 
+          type="password"
+          placeholder="Enter your API key">
+        </ion-input>
+      </ion-item>
+    </div>
+    
+    <ion-item>
+      <ion-label>Environment</ion-label>
+      <ion-select [(ngModel)]="selectedEnvironment">
+        <ion-select-option value="development">Development</ion-select-option>
+        <ion-select-option value="staging">Staging</ion-select-option>
+        <ion-select-option value="production">Production</ion-select-option>
+      </ion-select>
+    </ion-item>
+    
+    <ion-item>
+      <ion-button 
+        expand="block" 
+        (click)="saveSettings()"
+        [disabled]="(authMode === 'oauth' && (!tenantId || !clientId)) || (authMode === 'legacy' && (!agentId || !apiKey))">
+        Save Configuration
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Permissions -->
+  <ion-list-header>
+    <ion-label>Permissions</ion-label>
+  </ion-list-header>
+  
+  <ion-list>
+    <ion-item>
+      <ion-icon 
+        [name]="getPermissionIcon(permissions.microphone)" 
+        [color]="getPermissionColor(permissions.microphone)"
+        slot="start">
+      </ion-icon>
+      <ion-label>
+        <h2>Microphone</h2>
+        <p>Required for voice calls</p>
+      </ion-label>
+      <ion-note slot="end">{{ permissions.microphone }}</ion-note>
+    </ion-item>
+    
+    <ion-item *ngIf="permissions.notifications">
+      <ion-icon 
+        [name]="getPermissionIcon(permissions.notifications)" 
+        [color]="getPermissionColor(permissions.notifications)"
+        slot="start">
+      </ion-icon>
+      <ion-label>
+        <h2>Notifications</h2>
+        <p>For incoming call alerts</p>
+      </ion-label>
+      <ion-note slot="end">{{ permissions.notifications }}</ion-note>
+    </ion-item>
+    
+    <ion-item *ngIf="permissions.phone">
+      <ion-icon 
+        [name]="getPermissionIcon(permissions.phone)" 
+        [color]="getPermissionColor(permissions.phone)"
+        slot="start">
+      </ion-icon>
+      <ion-label>
+        <h2>Phone</h2>
+        <p>For native call integration</p>
+      </ion-label>
+      <ion-note slot="end">{{ permissions.phone }}</ion-note>
+    </ion-item>
+    
+    <ion-item>
+      <ion-button 
+        expand="block" 
+        (click)="requestPermissions()">
+        Request Permissions
+      </ion-button>
+    </ion-item>
+  </ion-list>
+
+  <!-- Service Status -->
+  <ion-list-header>
+    <ion-label>Service Status</ion-label>
+  </ion-list-header>
+  
+  <ion-list>
+    <ion-item>
+      <ion-icon 
+        [name]="(voiceService.isInitialized$ | async) ? 'checkmark-circle' : 'close-circle'" 
+        [color]="(voiceService.isInitialized$ | async) ? 'success' : 'danger'"
+        slot="start">
+      </ion-icon>
+      <ion-label>
+        <h2>Voice Service</h2>
+        <p>{{ (voiceService.isInitialized$ | async) ? 'Connected' : 'Disconnected' }}</p>
+      </ion-label>
+    </ion-item>
+    
+    <ion-item>
+      <ion-icon 
+        [name]="cxoneService.isInitialized ? 'checkmark-circle' : 'close-circle'" 
+        [color]="cxoneService.isInitialized ? 'success' : 'danger'"
+        slot="start">
+      </ion-icon>
+      <ion-label>
+        <h2>CXONE Service</h2>
+        <p>{{ cxoneService.isInitialized ? 'Connected' : 'Disconnected' }}</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+
+  <!-- About -->
+  <ion-list-header>
+    <ion-label>About</ion-label>
+  </ion-list-header>
+  
+  <ion-list>
+    <ion-item>
+      <ion-label>
+        <h2>CXONE Voice Demo</h2>
+        <p>Version 1.0.0</p>
+      </ion-label>
+    </ion-item>
+    
+    <ion-item>
+      <ion-label>
+        <h2>Plugin Version</h2>
+        <p>capacitor-cxone-voice v0.0.1</p>
+      </ion-label>
+    </ion-item>
+  </ion-list>
+</ion-content>

@@ -1,4 +1,7 @@
 import Foundation
+
+// Only compile this for real devices, not simulator
+#if !targetEnvironment(simulator)
 import WebRTC
 
 class WebRTCService: NSObject {
@@ -327,3 +330,5 @@ extension WebRTCService {
         rtcConfig.iceServers = iceServers
     }
 }
+
+#endif // !targetEnvironment(simulator)

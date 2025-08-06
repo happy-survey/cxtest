@@ -1,6 +1,6 @@
 {
   "name": "capacitor-cxone-voice",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Capacitor plugin for CXONE voice capabilities with support for iOS, Android, and PWA",
   "main": "dist/plugin.cjs.js",
   "module": "dist/esm/index.js",

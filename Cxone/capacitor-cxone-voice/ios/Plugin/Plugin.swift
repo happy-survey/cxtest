@@ -3,13 +3,13 @@ import Capacitor
 import CallKit
 import AVFoundation
 import PushKit
-import WebRTC
+// WebRTC is handled internally by CXONE SDK
 
 @objc(CXONEVoicePlugin)
 public class CXONEVoicePlugin: CAPPlugin {
     private var callManager: CallManager?
     private var audioSession: AudioSessionManager?
-    private var webRTCService: WebRTCService?
+    // WebRTC is now handled by CXONE SDK internally
     private var activeCalls: [String: CallInfo] = [:]
     private var pushRegistry: PKPushRegistry?
     private var cxoneSDK: CXONEVoiceSDK?
@@ -32,10 +32,11 @@ public class CXONEVoicePlugin: CAPPlugin {
     }
     
     private func setupWebRTC() {
-        webRTCService = WebRTCService()
+        // WebRTC is now handled by CXONE SDK internally
+        // No separate WebRTC setup needed
     }
     
-    @objc func initialize(_ call: CAPPluginCall) {
+    @objc public func initialize(_ call: CAPPluginCall) {
         guard let agentId = call.getString("agentId"),
               let apiKey = call.getString("apiKey"),
               let environment = call.getString("environment") else {
@@ -66,7 +67,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         call.resolve()
     }
     
-    @objc func makeCall(_ call: CAPPluginCall) {
+    @objc public func makeCall(_ call: CAPPluginCall) {
         guard let phoneNumber = call.getString("phoneNumber") else {
             call.reject("Phone number is required")
             return
@@ -97,21 +98,20 @@ public class CXONEVoicePlugin: CAPPlugin {
                 return
             }
             
-            // Setup WebRTC connection
-            self?.webRTCService?.makeCall(to: phoneNumber) { success in
-                if success {
-                    call.resolve([
-                        "callId": callId,
-                        "state": "dialing"
-                    ])
-                } else {
-                    call.reject("Failed to establish WebRTC connection")
-                }
+            // Use CXONE SDK to handle the call
+            let cxoneCallId = self?.cxoneSDK?.makeCall(phoneNumber: phoneNumber, metadata: nil)
+            if cxoneCallId != nil {
+                call.resolve([
+                    "callId": callId,
+                    "state": "dialing"
+                ])
+            } else {
+                call.reject("Failed to establish call via CXONE")
             }
         }
     }
     
-    @objc func answerCall(_ call: CAPPluginCall) {
+    @objc public func answerCall(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId") else {
             call.reject("Call ID is required")
             return
@@ -129,19 +129,14 @@ public class CXONEVoicePlugin: CAPPlugin {
                 return
             }
             
-            // Setup WebRTC connection
-            self?.webRTCService?.answerCall(callId: callId) { success in
-                if success {
-                    self?.updateCallState(callId: callId, state: .connected)
-                    call.resolve()
-                } else {
-                    call.reject("Failed to establish WebRTC connection")
-                }
-            }
+            // Use CXONE SDK to answer the call
+            self?.cxoneSDK?.answerCall(callId)
+            self?.updateCallState(callId: callId, state: .connected)
+            call.resolve()
         }
     }
     
-    @objc func endCall(_ call: CAPPluginCall) {
+    @objc public func endCall(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId") else {
             call.reject("Call ID is required")
             return
@@ -159,8 +154,8 @@ public class CXONEVoicePlugin: CAPPlugin {
                 return
             }
             
-            // Cleanup WebRTC
-            self?.webRTCService?.endCall(callId: callId)
+            // Use CXONE SDK to end the call
+            self?.cxoneSDK?.endCall(callId)
             
             // Remove from active calls
             self?.activeCalls.removeValue(forKey: callId)
@@ -169,14 +164,15 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func muteCall(_ call: CAPPluginCall) {
+    @objc public func muteCall(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId"),
               let muted = call.getBool("muted") else {
             call.reject("Missing required parameters")
             return
         }
         
-        webRTCService?.setMute(callId: callId, muted: muted)
+        // Mute is handled through CXONE SDK
+        // TODO: Implement mute through CXONE SDK when available
         
         if var callInfo = activeCalls[callId] {
             callInfo.isMuted = muted
@@ -186,7 +182,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         call.resolve()
     }
     
-    @objc func playRecording(_ call: CAPPluginCall) {
+    @objc public func playRecording(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId"),
               let recordingUrl = call.getString("recordingUrl") else {
             call.reject("Missing required parameters")
@@ -214,7 +210,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func stopRecording(_ call: CAPPluginCall) {
+    @objc public func stopRecording(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId") else {
             call.reject("Call ID is required")
             return
@@ -230,7 +226,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         call.resolve()
     }
     
-    @objc func getActiveCall(_ call: CAPPluginCall) {
+    @objc public func getActiveCall(_ call: CAPPluginCall) {
         let activeCall = activeCalls.values.first { $0.state == .connected }
         
         if let activeCall = activeCall {
@@ -240,12 +236,12 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func getActiveCalls(_ call: CAPPluginCall) {
+    @objc public func getActiveCalls(_ call: CAPPluginCall) {
         let calls = activeCalls.values.map { $0.toDictionary() }
         call.resolve(["calls": calls])
     }
     
-    @objc func holdCall(_ call: CAPPluginCall) {
+    @objc public func holdCall(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId") else {
             call.reject("Call ID is required")
             return
@@ -270,7 +266,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func resumeCall(_ call: CAPPluginCall) {
+    @objc public func resumeCall(_ call: CAPPluginCall) {
         guard let callId = call.getString("callId") else {
             call.reject("Call ID is required")
             return
@@ -295,7 +291,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func checkPermissions(_ call: CAPPluginCall) {
+    @objc public override func checkPermissions(_ call: CAPPluginCall) {
         var permissions: [String: String] = [:]
         
         // Check microphone permission
@@ -327,7 +323,7 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func requestPermissions(_ call: CAPPluginCall) {
+    @objc public override func requestPermissions(_ call: CAPPluginCall) {
         var permissions: [String: String] = [:]
         let group = DispatchGroup()
         
@@ -350,7 +346,18 @@ public class CXONEVoicePlugin: CAPPlugin {
         }
     }
     
-    @objc func registerForPushNotifications(_ call: CAPPluginCall) {
+    @objc public func transferCall(_ call: CAPPluginCall) {
+        guard let callId = call.getString("callId"),
+              let toNumber = call.getString("toNumber") else {
+            call.reject("Missing required parameters")
+            return
+        }
+        
+        // TODO: Implement call transfer functionality
+        call.reject("Call transfer not implemented yet")
+    }
+    
+    @objc public func registerForPushNotifications(_ call: CAPPluginCall) {
         setupPushNotifications()
         
         // Return cached push token if available
@@ -359,6 +366,11 @@ public class CXONEVoicePlugin: CAPPlugin {
         } else {
             call.reject("Push token not available yet")
         }
+    }
+    
+    @objc public override func removeAllListeners(_ call: CAPPluginCall) {
+        super.removeAllListeners(call)
+        call.resolve()
     }
     
     // MARK: - Private Methods

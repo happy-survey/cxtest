@@ -21,12 +21,6 @@ class CallManager: NSObject {
             providerConfiguration.iconTemplateImageData = iconImage.pngData()
         }
         
-        // Configure audio session
-        providerConfiguration.configureAudioSession = { _ in
-            // Audio session will be configured by AudioSessionManager
-            return true
-        }
-        
         provider = CXProvider(configuration: providerConfiguration)
         
         super.init()

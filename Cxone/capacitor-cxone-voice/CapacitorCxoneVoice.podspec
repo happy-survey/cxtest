@@ -13,11 +13,9 @@ Pod::Spec.new do |s|
   s.source_files = 'ios/Plugin/**/*.{swift,h,m,c,cc,mm,cpp}'
   s.ios.deployment_target  = '13.0'
   s.dependency 'Capacitor'
-  s.dependency 'GoogleWebRTC', '~> 1.1'
+  # Temporarily comment out WebRTC dependency to allow simulator builds
+  # s.dependency 'GoogleWebRTC', '~> 1.1'
   s.swift_version = '5.1'
-  s.pod_target_xcconfig = {
-    'SWIFT_OBJC_BRIDGING_HEADER' => '$(PODS_TARGET_SRCROOT)/ios/Plugin/Plugin-Bridging-Header.h'
-  }
   
   # Required for CallKit and PushKit
   s.frameworks = [
